@@ -87,18 +87,15 @@ void SuffixTree::setSuffixIndex( Node *root, ll height)
 	if( root == NULL)
 		return;
 
-	if( root->start != -1)
+	if( *(root->end) == (size - 1))
 	{
-		print(root->start, *(root->end));
+		print( *(root->end) - height + 1, *(root->end));
 	}
 	bool leaf = true;
 	for ( ll i = 0; i < MAX_CHAR; i++)
 	{
 		if ( root->children[i] != NULL)
 		{
-			if ( leaf && root->start != -1)
-				cout << root->suffixIndex << "\n";
-
 			leaf = false;
 			setSuffixIndex(root->children[i], height + edgeLength(root->children[i]));
 		} 
@@ -106,7 +103,7 @@ void SuffixTree::setSuffixIndex( Node *root, ll height)
 	if(leaf)
 	{
 		root->suffixIndex = size - height;
-		cout << root->suffixIndex << "\n";
+		cout << " " << root->suffixIndex << "\n";
 	}
 }
 
@@ -135,11 +132,13 @@ void SuffixTree::extendSuffixTree( ll pos)
 	while( remainingSuffixCount > 0)
 	{
 		if( activeLength == 0)
-			activeEdge = pos;
-
-		if( activeNode->children[pos] == NULL)
 		{
-			activeNode->children[pos] = newNode( pos, &leafEnd);
+			activeEdge = pos;
+		}
+
+		if( activeNode->children[str[activeEdge]] == NULL)
+		{
+			activeNode->children[str[activeEdge]] = newNode( pos, &leafEnd);
 			if (lastNewNode != NULL)
 			{
 				lastNewNode->suffixLink = activeNode;
@@ -149,7 +148,7 @@ void SuffixTree::extendSuffixTree( ll pos)
 		}
 		else
 		{
-			Node *next = activeNode->children[pos];
+			Node *next = activeNode->children[str[activeEdge]];
 			if (walkDown(next))
 			{
 				continue;
@@ -169,11 +168,11 @@ void SuffixTree::extendSuffixTree( ll pos)
 			*splitEnd = next->start + activeLength - 1;
 
 			Node *split = newNode(next->start, splitEnd);
-			activeNode->children[pos] = split;
- 
-			split->children[pos] = newNode(pos, &leafEnd);
+ 			activeNode->children[str[activeEdge]] = split;
+			
+			split->children[str[pos]] = newNode(pos, &leafEnd);
 			next->start += activeLength;
-			split->children[pos] = next;
+			split->children[str[next->start]] = next;
 
 			if (lastNewNode != NULL)
 			{
@@ -206,7 +205,6 @@ void SuffixTree::buildSuffixTree( string s)
 	activeNode = root;
 	for( ll i = 0; i < size; i++)
 	{	
-		//cout << i << "\n";
 		extendSuffixTree( i);
 	}
 	setSuffixIndex( root, 0);
@@ -215,6 +213,6 @@ void SuffixTree::buildSuffixTree( string s)
 int main()
 {
 	SuffixTree s;
-	s.buildSuffixTree("xyzy");
+	s.buildSuffixTree("xyzxy");
 
 }
